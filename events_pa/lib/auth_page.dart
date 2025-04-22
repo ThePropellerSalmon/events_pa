@@ -13,6 +13,20 @@ class _AuthPageState extends State<AuthPage> {
   final _passwordController = TextEditingController();
   bool _isLoading = false;
 
+    @override
+  void initState() {
+    super.initState();
+
+    // Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+    //   final session = data.session;
+    //   final event = data.event;
+
+    //   if (event == AuthChangeEvent.passwordRecovery && session != null) {
+    //     Navigator.pushReplacementNamed(context, '/update-password');
+    //   }
+    // });
+  }
+
   // Login function
   Future<void> _login() async {
     setState(() {
@@ -88,7 +102,7 @@ class _AuthPageState extends State<AuthPage> {
             ),
             TextButton(
               onPressed: () {
-                Navigator.pushNamed(context, '/reset-password');
+                Navigator.pushNamed(context, '/forgot-password');
               },
               child: const Text('I forgot my password'),
             ),

@@ -11,6 +11,8 @@ dependencies:
     sdk: flutter
   supabase_flutter: ^2.8.4
   flutter_validator: ^0.1.0+2
+  # supabase_auth_ui: ^0.5.4
+  app_links: ^3.5.1
 
 dev_dependencies:
   flutter_test:
