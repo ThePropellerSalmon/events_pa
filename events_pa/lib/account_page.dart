@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AccountPage extends StatelessWidget {
   const AccountPage({super.key});
@@ -11,18 +12,9 @@ class AccountPage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
-              'Welcome to your account!',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
+            const Text('Welcome to your account!', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                // Navigate back to the authentication page
-                Navigator.pushReplacementNamed(context, '/');
-              },
-              child: const Text('Log Out'),
-            ),
+            ElevatedButton(onPressed: () => Supabase.instance.client.auth.signOut(), child: const Text('Log Out')),
           ],
         ),
       ),

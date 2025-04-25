@@ -1,30 +1,29 @@
+// ignore_for_file: avoid_print
+
+import 'dart:async';
+
+import 'package:events_pa/main.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class AuthPage extends StatefulWidget {
-  const AuthPage({super.key});
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
 
   @override
-  _AuthPageState createState() => _AuthPageState();
+  State<LoginPage> createState() => _LoginPageState();
 }
 
-class _AuthPageState extends State<AuthPage> {
+class _LoginPageState extends State<LoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
 
-    @override
-  void initState() {
-    super.initState();
-
-    // Supabase.instance.client.auth.onAuthStateChange.listen((data) {
-    //   final session = data.session;
-    //   final event = data.event;
-
-    //   if (event == AuthChangeEvent.passwordRecovery && session != null) {
-    //     Navigator.pushReplacementNamed(context, '/update-password');
-    //   }
-    // });
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 
   // Login function
@@ -45,12 +44,7 @@ class _AuthPageState extends State<AuthPage> {
 
       if (response.user == null) {
         // Handle error if user is null (login failed)
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Invalid email or password')),
-        );
-      } else {
-        // Navigate to the user account page
-        Navigator.pushReplacementNamed(context, '/account');
+        context.showSnackBar('Invalid email or password');
       }
     } catch (error) {
       setState(() {
@@ -58,18 +52,14 @@ class _AuthPageState extends State<AuthPage> {
       });
 
       // Handle any unexpected errors during the login process
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $error')),
-      );
+      context.showSnackBar('Error: $error');
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Login')
-      ),
+      appBar: AppBar(title: const Text('Login')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -88,21 +78,19 @@ class _AuthPageState extends State<AuthPage> {
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: _isLoading ? null : _login, 
-              child: _isLoading
-                      ? const CircularProgressIndicator()
-                      : const Text('Login'),
+              onPressed: _isLoading ? null : _login,
+              child: _isLoading ? const CircularProgressIndicator() : const Text('Login'),
             ),
             const SizedBox(height: 16),
             TextButton(
               onPressed: () {
-                Navigator.pushNamed(context, '/signup');
-              }, 
+                context.go('/signup');
+              },
               child: const Text('Create an account'),
             ),
             TextButton(
               onPressed: () {
-                Navigator.pushNamed(context, '/forgot-password');
+                context.go('/forgot-password');
               },
               child: const Text('I forgot my password'),
             ),

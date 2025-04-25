@@ -1,4 +1,6 @@
+import 'package:events_pa/main.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class UpdatePasswordPage extends StatefulWidget {
@@ -28,9 +30,7 @@ class _UpdatePasswordPageState extends State<UpdatePasswordPage> {
     });
 
     if (session == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('You must be signed in to update your password.')),
-      );
+      context.showSnackBar('You must be signed in to update your password.');
     }
   }
 
@@ -39,9 +39,7 @@ class _UpdatePasswordPageState extends State<UpdatePasswordPage> {
     final confirmPassword = _confirmPasswordController.text;
 
     if (newPassword != confirmPassword) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Passwords do not match')),
-      );
+      context.showSnackBar('Passwords do not match');
       return;
     }
 
@@ -50,19 +48,13 @@ class _UpdatePasswordPageState extends State<UpdatePasswordPage> {
     });
 
     try {
-      await Supabase.instance.client.auth.updateUser(
-        UserAttributes(password: newPassword),
-      );
+      await Supabase.instance.client.auth.updateUser(UserAttributes(password: newPassword));
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Your password has been updated!')),
-      );
+      context.showSnackBar('Your password has been updated!');
 
-      Navigator.pop(context); // Or navigate to login screen
+      context.go('/account');
     } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error updating password: $error')),
-      );
+      context.showSnackBar('Error updating password: $error');
     } finally {
       setState(() {
         _isLoading = false;
@@ -73,15 +65,11 @@ class _UpdatePasswordPageState extends State<UpdatePasswordPage> {
   @override
   Widget build(BuildContext context) {
     if (!_isSignedIn) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Update Password'),
-      ),
+      appBar: AppBar(title: const Text('Update Password')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -101,9 +89,7 @@ class _UpdatePasswordPageState extends State<UpdatePasswordPage> {
             const SizedBox(height: 24),
             ElevatedButton(
               onPressed: _isLoading ? null : _updatePassword,
-              child: _isLoading
-                  ? const CircularProgressIndicator()
-                  : const Text('Update Password'),
+              child: _isLoading ? const CircularProgressIndicator() : const Text('Update Password'),
             ),
           ],
         ),
