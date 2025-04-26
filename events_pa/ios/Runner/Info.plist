@@ -28,10 +28,10 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>com.example.events-pa</string>
+			<string>com.eventspa.app</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.example.events-pa</string>
+				<string>com.eventspa.app</string>
 			</array>
 		</dict>
 	</array>

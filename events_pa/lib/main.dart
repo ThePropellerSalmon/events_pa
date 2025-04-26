@@ -14,7 +14,7 @@ import 'signup_page.dart';
 import 'update_password_page.dart'; // Add this if not already
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-const String supabaseAuthCallback = 'com.example.events-pa://login-callback/';
+const String supabaseAuthCallback = 'com.eventspa.app://login-callback/';
 const String supabaseUrl = 'https://eclzdvaxrevuktnfrbkq.supabase.co';
 const String supabaseAnonKey =
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjbHpkdmF4cmV2dWt0bmZyYmtxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI3NzUyNDgsImV4cCI6MjA1ODM1MTI0OH0.pH3_ThyRKgu-qfTwwukHTc5EiyWjyW-eD60OhHmNZN0';
