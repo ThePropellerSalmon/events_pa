@@ -2,6 +2,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -14,12 +15,19 @@ import 'signup_page.dart';
 import 'update_password_page.dart'; // Add this if not already
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-const String supabaseAuthCallback = 'com.eventspa.app://login-callback/';
-const String supabaseUrl = 'https://eclzdvaxrevuktnfrbkq.supabase.co';
-const String supabaseAnonKey =
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjbHpkdmF4cmV2dWt0bmZyYmtxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI3NzUyNDgsImV4cCI6MjA1ODM1MTI0OH0.pH3_ThyRKgu-qfTwwukHTc5EiyWjyW-eD60OhHmNZN0';
+
+final String supabaseUrl = dotenv.env['SUPABASE_URL']!;
+final String supabaseAnonKey = dotenv.env['SUPABASE_ANON_KEY']!;
+final String supabaseAuthCallback = dotenv.env['SUPABASE_AUTH_CALLBACK']!;
+
+// const String supabaseAuthCallback = 'com.eventspa.app://login-callback/';
+// const String supabaseUrl = 'https://eclzdvaxrevuktnfrbkq.supabase.co';
+// const String supabaseAnonKey =
+//     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjbHpkdmF4cmV2dWt0bmZyYmtxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI3NzUyNDgsImV4cCI6MjA1ODM1MTI0OH0.pH3_ThyRKgu-qfTwwukHTc5EiyWjyW-eD60OhHmNZN0';
 
 void main() async {
+  await dotenv.load();
+
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize Supabase
