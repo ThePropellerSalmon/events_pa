@@ -7,9 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+// Pages
 import 'account_page.dart';
 import 'forgot_password_page.dart';
-// Pages
 import 'login_page.dart';
 import 'signup_page.dart';
 import 'update_password_page.dart'; // Add this if not already
