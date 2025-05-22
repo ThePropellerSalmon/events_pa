@@ -36,14 +36,8 @@ class _SignupPageState extends State<SignupPage> {
 
   Future<bool> _isEmailAlreadyRegistered(String email) async {
     final supabase = Supabase.instance.client;
-
     final users = await supabase.from('users').select();
-
     final data = await supabase.from('users').select('email').eq('email', email.trim().toLowerCase());
-
-    print(users);
-
-    print(data);
 
     var emailExist = false;
 

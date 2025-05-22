@@ -20,11 +20,6 @@ final String supabaseUrl = dotenv.env['SUPABASE_URL']!;
 final String supabaseAnonKey = dotenv.env['SUPABASE_ANON_KEY']!;
 final String supabaseAuthCallback = dotenv.env['SUPABASE_AUTH_CALLBACK']!;
 
-// const String supabaseAuthCallback = 'com.eventspa.app://login-callback/';
-// const String supabaseUrl = 'https://eclzdvaxrevuktnfrbkq.supabase.co';
-// const String supabaseAnonKey =
-//     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjbHpkdmF4cmV2dWt0bmZyYmtxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI3NzUyNDgsImV4cCI6MjA1ODM1MTI0OH0.pH3_ThyRKgu-qfTwwukHTc5EiyWjyW-eD60OhHmNZN0';
-
 void main() async {
   await dotenv.load();
 
@@ -64,15 +59,6 @@ GoRouter _router(Listenable refreshListenable) => GoRouter(
     GoRoute(path: '/account', builder: (context, state) => AccountPage()),
   ],
 );
-
-// class MainApp extends StatelessWidget {
-//   const MainApp({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp.router(routerConfig: _router);
-//   }
-// }
 
 class MainApp extends StatefulWidget {
   const MainApp({super.key});
