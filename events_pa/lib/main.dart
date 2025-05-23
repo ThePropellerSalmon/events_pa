@@ -14,6 +14,9 @@ import 'login_page.dart';
 import 'signup_page.dart';
 import 'update_password_page.dart'; // Add this if not already
 
+// Custom widgets
+import 'custom_widgets/side_menu_scaffold.dart';
+
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 final String supabaseUrl = dotenv.env['SUPABASE_URL']!;
@@ -56,7 +59,10 @@ GoRouter _router(Listenable refreshListenable) => GoRouter(
     GoRoute(path: '/signup', builder: (context, state) => SignupPage()),
     GoRoute(path: '/forgot-password', builder: (context, state) => ForgotPasswordPage()),
     GoRoute(path: '/update-password', builder: (context, state) => UpdatePasswordPage()),
-    GoRoute(path: '/account', builder: (context, state) => AccountPage()),
+    GoRoute(path: '/account', builder: (context, state) => SideMenuScaffold(child: AccountPage(),),
+    //GoRoute(path: '/activities', builder: (context, state) => SideMenuScaffold(child: ActivitiesPage(),),
+),
+
   ],
 );
 
