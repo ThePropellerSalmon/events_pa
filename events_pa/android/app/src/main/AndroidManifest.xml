@@ -1,6 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.eventspa.app">
 
+    <!-- Add the permission to let the app access the network for geocoding  -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:label="events_pa"
         android:name="${applicationName}"

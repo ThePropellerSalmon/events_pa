@@ -1,5 +1,7 @@
+import 'package:events_pa/events_map_page.dart';
 import 'package:events_pa/main.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:intl/intl.dart';
@@ -196,7 +198,24 @@ class _AccountPageState extends State<AccountPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Account Page')),
+      appBar: AppBar(
+        //title: const Text('Account Page'),
+        flexibleSpace: SafeArea(
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Padding(
+              padding: const EdgeInsets.only(left: 16.0),
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.map),
+                label: const Text('Go to Map'),
+                onPressed: () {
+                  context.push('/events_map');
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
       body: SingleChildScrollView(
         child: Center(
           child: Column(

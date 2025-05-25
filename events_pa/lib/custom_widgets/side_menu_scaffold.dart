@@ -20,6 +20,11 @@ class SideMenuScaffold extends StatelessWidget {
               children: [
                 const SizedBox(height: 20),
                 IconButton(
+                  icon: const Icon(Icons.person_outline_outlined),
+                  onPressed: () => context.go('/account'),
+                  tooltip: 'Account',
+                ),
+                IconButton(
                   icon: const Icon(Icons.search),
                   onPressed: () => context.go('/account'),
                   tooltip: 'Search',
