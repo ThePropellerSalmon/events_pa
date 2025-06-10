@@ -1,7 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'dart:async';
-
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -19,6 +18,8 @@ import 'events_map_page.dart';
 import 'custom_widgets/side_menu_scaffold.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+final GlobalKey<EventsMapPageState> mapKey = GlobalKey();
+final GlobalKey<SideMenuScaffoldState> sideMenuKey = GlobalKey();
 
 final String supabaseUrl = dotenv.env['SUPABASE_URL']!;
 final String supabaseAnonKey = dotenv.env['SUPABASE_ANON_KEY']!;
@@ -39,33 +40,53 @@ void main() async {
 }
 
 GoRouter _router(Listenable refreshListenable) => GoRouter(
-  initialLocation: '/account',
-  debugLogDiagnostics: true,
-  refreshListenable: refreshListenable,
-  navigatorKey: navigatorKey,
-  redirect: (context, state) {
-    final session = Supabase.instance.client.auth.currentSession;
-    final publicRoutes = ['/login', '/signup', '/forgot-password'];
-    debugPrint('Current Path: ${state.fullPath}');
-    debugPrint('Matched Path: ${state.matchedLocation}');
-    if (session == null && !publicRoutes.contains(state.fullPath)) {
-      return '/login';
-    } else {
-      debugPrint('User is allowed to continue to ${state.matchedLocation}');
-      return null;
-    }
-  },
-  routes: [
-    GoRoute(path: '/login', builder: (context, state) => LoginPage()),
-    GoRoute(path: '/signup', builder: (context, state) => SignupPage()),
-    GoRoute(path: '/forgot-password', builder: (context, state) => ForgotPasswordPage()),
-    GoRoute(path: '/update-password', builder: (context, state) => UpdatePasswordPage()),
-    //GoRoute(path: '/account', builder: (context, state) => SideMenuScaffold(child: AccountPage(),),),
-    GoRoute(path: '/account', builder: (context, state) => AccountPage()),
-    GoRoute(path: '/events_map', builder: (context, state) => SideMenuScaffold(child: EventsMapPage(),),),
-    //GoRoute(path: '/activities', builder: (context, state) => SideMenuScaffold(child: ActivitiesPage(),),
-  ],
-);
+      initialLocation: '/account',
+      debugLogDiagnostics: true,
+      refreshListenable: refreshListenable,
+      navigatorKey: navigatorKey,
+      redirect: (context, state) {
+        final session = Supabase.instance.client.auth.currentSession;
+        final publicRoutes = ['/login', '/signup', '/forgot-password'];
+        debugPrint('Current Path: ${state.fullPath}');
+        debugPrint('Matched Path: ${state.matchedLocation}');
+        if (session == null && !publicRoutes.contains(state.fullPath)) {
+          return '/login';
+        } else {
+          debugPrint('User is allowed to continue to ${state.matchedLocation}');
+          return null;
+        }
+      },
+      routes: [
+        GoRoute(path: '/login', builder: (context, state) => LoginPage()),
+        GoRoute(path: '/signup', builder: (context, state) => SignupPage()),
+        GoRoute(path: '/forgot-password', builder: (context, state) => ForgotPasswordPage()),
+        GoRoute(path: '/update-password', builder: (context, state) => UpdatePasswordPage()),
+        GoRoute(path: '/account', builder: (context, state) => AccountPage()),
+        GoRoute(
+          path: '/events_map',
+          builder: (context, state) => SideMenuScaffold(
+            key: sideMenuKey,
+            onSectionOpenOrClick: () {
+              final mapState = mapKey.currentState;
+              if (mapState != null) {
+                mapState.closePopup();
+              }
+            },
+            child: EventsMapPage(
+              key: mapKey,
+              onMapTap: () {
+                final sideMenuState = sideMenuKey.currentState;
+                sideMenuState?.clearSection();
+              },
+              onRequestClearMenu: () {
+                final sideMenuState = sideMenuKey.currentState;
+                sideMenuState?.clearSection(closePopup: false);
+              },
+            ),
+          ),
+        ),
+      ],
+    );
 
 class MainApp extends StatefulWidget {
   const MainApp({super.key});
@@ -80,7 +101,10 @@ class _MainAppState extends State<MainApp> {
   @override
   void initState() {
     super.initState();
-    _authStateListenable = AuthStateListenable(context, Supabase.instance.client.auth.onAuthStateChange);
+    _authStateListenable = AuthStateListenable(
+      context,
+      Supabase.instance.client.auth.onAuthStateChange,
+    );
   }
 
   @override
@@ -91,7 +115,9 @@ class _MainAppState extends State<MainApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(routerConfig: _router(_authStateListenable));
+    return MaterialApp.router(
+      routerConfig: _router(_authStateListenable),
+    );
   }
 }
 
@@ -107,7 +133,9 @@ class AuthStateListenable extends ChangeNotifier {
         debugPrint('AuthChangeEvent: ${data.event.name}');
         final route = getRoute(data.event);
         if (route != null) {
-          WidgetsBinding.instance.addPostFrameCallback((_) => navigatorKey.currentContext?.go(route));
+          WidgetsBinding.instance.addPostFrameCallback(
+            (_) => navigatorKey.currentContext?.go(route),
+          );
         }
         _latestValue = data;
         notifyListeners();
