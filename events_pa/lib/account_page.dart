@@ -24,7 +24,7 @@ class _AccountPageState extends State<AccountPage> {
   static const String enterNewPasswordLbl = "Enter your new password: ";
   static const String confirmNewPasswordLbl = "Confirm your new password: ";
   static const String accountCreationDateLbl = "Active since: ";
-  
+
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
   final _enterNewPasswordController = TextEditingController();
@@ -52,12 +52,13 @@ class _AccountPageState extends State<AccountPage> {
 
     if (authUser == null) return;
 
-    final response = await Supabase.instance.client
-      .from('users')
-      .select()
-      .eq('userId', authUser.id)
-      .single();
-    
+    final response =
+        await Supabase.instance.client
+            .from('users')
+            .select()
+            .eq('userId', authUser.id)
+            .single();
+
     setState(() {
       currentUser = response;
 
@@ -72,31 +73,35 @@ class _AccountPageState extends State<AccountPage> {
 
   // Function to check if the password is strong
   bool _isStrongPassword(String password) {
-    final strongPasswordRegex = RegExp(r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$');
+    final strongPasswordRegex = RegExp(
+      r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$',
+    );
     return strongPasswordRegex.hasMatch(password);
   }
 
   bool _validateFields() {
     setState(() {
-      _firstNameError = _firstNameController.text.isEmpty ? "First Name is required" : null;
-      _lastNameError = _lastNameController.text.isEmpty ? "Last Name is required" : null;
+      _firstNameError =
+          _firstNameController.text.isEmpty ? "First Name is required" : null;
+      _lastNameError =
+          _lastNameController.text.isEmpty ? "Last Name is required" : null;
 
-      if (_enterNewPasswordController.text.isEmpty && _confirmNewPasswordController.text.isEmpty)
-      {
+      if (_enterNewPasswordController.text.isEmpty &&
+          _confirmNewPasswordController.text.isEmpty) {
         _enterNewPasswordError = null;
         _confirmNewPasswordError = null;
       } else {
         _enterNewPasswordError =
-          !_isStrongPassword(_enterNewPasswordController.text)
-            ? "Password must be at least 8 characters, contain an uppercase letter, a lowercase letter, a number, and a special character."
-            : null;
+            !_isStrongPassword(_enterNewPasswordController.text)
+                ? "Password must be at least 8 characters, contain an uppercase letter, a lowercase letter, a number, and a special character."
+                : null;
         _confirmNewPasswordError =
-          _confirmNewPasswordController.text != _enterNewPasswordController.text
-            ? "Passwords do not match"
-            : null;
+            _confirmNewPasswordController.text !=
+                    _enterNewPasswordController.text
+                ? "Passwords do not match"
+                : null;
       }
     });
-
 
     return _firstNameError == null &&
         _lastNameError == null &&
@@ -114,29 +119,34 @@ class _AccountPageState extends State<AccountPage> {
     setState(() {
       _isLoading = true;
     });
-    
-    try {
-      final passwordUpdated = await _updatePassword(_enterNewPasswordController.text);
 
-      if (!passwordUpdated) {
-        return;
+    try {
+      if (_enterNewPasswordController.text != "" &&
+          _confirmNewPasswordController.text != "") {
+        final passwordUpdated = await _updatePassword(
+          _enterNewPasswordController.text,
+        );
+
+        if (!passwordUpdated) {
+          return;
+        }
       }
 
-      final response = await Supabase.instance.client
-        .from('users')
-        .update({
-          'firstName': _firstNameController.text.trim(),
-          'lastName': _lastNameController.text.trim(),
-        })
-        .eq('userId', authUser.id)
-        .select();
+      final response =
+          await Supabase.instance.client
+              .from('users')
+              .update({
+                'firstName': _firstNameController.text.trim(),
+                'lastName': _lastNameController.text.trim(),
+              })
+              .eq('userId', authUser.id)
+              .select();
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('User updated successfully!')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('User updated successfully!')));
     } catch (error) {
       context.showSnackBar('Error updating the user: $error');
-
     } finally {
       setState(() {
         _isLoading = false;
@@ -155,11 +165,10 @@ class _AccountPageState extends State<AccountPage> {
       } else {
         return false;
       }
-
     } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Unexpected error: $error')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Unexpected error: $error')));
     }
     return false;
   }
@@ -178,7 +187,8 @@ class _AccountPageState extends State<AccountPage> {
       final suffix = getDaySuffix(day);
 
       // Format as "1st of January 2025"
-      final formatted = '$day$suffix of ${DateFormat('MMMM y').format(parsedDate)}';
+      final formatted =
+          '$day$suffix of ${DateFormat('MMMM y').format(parsedDate)}';
       return formatted;
     } catch (e) {
       return '';
@@ -188,10 +198,14 @@ class _AccountPageState extends State<AccountPage> {
   String getDaySuffix(int day) {
     if (day >= 11 && day <= 13) return 'th';
     switch (day % 10) {
-      case 1: return 'st';
-      case 2: return 'nd';
-      case 3: return 'rd';
-      default: return 'th';
+      case 1:
+        return 'st';
+      case 2:
+        return 'nd';
+      case 3:
+        return 'rd';
+      default:
+        return 'th';
     }
   }
 
@@ -236,7 +250,10 @@ class _AccountPageState extends State<AccountPage> {
                       flex: 2,
                       child: Text(
                         emailLbl,
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
                       ),
                     ),
                     Expanded(
@@ -252,7 +269,7 @@ class _AccountPageState extends State<AccountPage> {
               ),
 
               const SizedBox(height: 10),
-        
+
               // FirstName
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -262,7 +279,10 @@ class _AccountPageState extends State<AccountPage> {
                       flex: 2,
                       child: Text(
                         firstNameLbl,
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
                       ),
                     ),
                     Expanded(
@@ -276,7 +296,7 @@ class _AccountPageState extends State<AccountPage> {
                   ],
                 ),
               ),
-              
+
               const SizedBox(height: 10),
 
               // LastName
@@ -288,7 +308,10 @@ class _AccountPageState extends State<AccountPage> {
                       flex: 2,
                       child: Text(
                         lastNameLbl,
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
                       ),
                     ),
                     Expanded(
@@ -302,7 +325,7 @@ class _AccountPageState extends State<AccountPage> {
                   ],
                 ),
               ),
-              
+
               const SizedBox(height: 10),
 
               // EnterNewPassword
@@ -314,14 +337,19 @@ class _AccountPageState extends State<AccountPage> {
                       flex: 2,
                       child: Text(
                         enterNewPasswordLbl,
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
                       ),
                     ),
                     Expanded(
                       flex: 3,
                       child: TextField(
                         controller: _enterNewPasswordController,
-                        decoration: InputDecoration(errorText: _enterNewPasswordError),
+                        decoration: InputDecoration(
+                          errorText: _enterNewPasswordError,
+                        ),
                         style: const TextStyle(fontSize: 16),
                         obscureText: true,
                       ),
@@ -341,14 +369,19 @@ class _AccountPageState extends State<AccountPage> {
                       flex: 2,
                       child: Text(
                         confirmNewPasswordLbl,
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
                       ),
                     ),
                     Expanded(
                       flex: 3,
                       child: TextField(
                         controller: _confirmNewPasswordController,
-                        decoration: InputDecoration(errorText: _confirmNewPasswordError),
+                        decoration: InputDecoration(
+                          errorText: _confirmNewPasswordError,
+                        ),
                         style: const TextStyle(fontSize: 16),
                         obscureText: true,
                       ),
@@ -356,16 +389,16 @@ class _AccountPageState extends State<AccountPage> {
                   ],
                 ),
               ),
-        
+
               const SizedBox(height: 20),
-        
+
               Divider(
                 thickness: 1,
                 color: Colors.black, // You can change color
               ),
-        
+
               const SizedBox(height: 10),
-        
+
               // Creation date
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -375,7 +408,10 @@ class _AccountPageState extends State<AccountPage> {
                       flex: 2,
                       child: Text(
                         accountCreationDateLbl,
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
                       ),
                     ),
                     Expanded(
@@ -389,16 +425,19 @@ class _AccountPageState extends State<AccountPage> {
                   ],
                 ),
               ),
-        
+
               const SizedBox(height: 40),
-        
+
               ElevatedButton(
                 onPressed: _isLoading ? null : _updateUserInfo,
-                child: _isLoading ? const CircularProgressIndicator() : const Text('Update'),
+                child:
+                    _isLoading
+                        ? const CircularProgressIndicator()
+                        : const Text('Update'),
               ),
-        
+
               const SizedBox(height: 40),
-        
+
               ElevatedButton(
                 onPressed: () => Supabase.instance.client.auth.signOut(),
                 child: const Text('Log Out'),

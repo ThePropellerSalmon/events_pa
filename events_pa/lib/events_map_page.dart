@@ -26,7 +26,6 @@ class EventsMapPageState extends State<EventsMapPage> {
     });
   }
 
-
   @override
   void initState() {
     super.initState();
@@ -35,12 +34,15 @@ class EventsMapPageState extends State<EventsMapPage> {
 
   Future<void> _loadDefaultPosition() async {
     try {
-      List<Location> locations =
-          await locationFromAddress('Shippagan, New Brunswick, Canada');
+      List<Location> locations = await locationFromAddress(
+        'Shippagan, New Brunswick, Canada',
+      );
       if (locations.isNotEmpty) {
         setState(() {
-          _defaultPosition =
-              LatLng(locations.first.latitude, locations.first.longitude);
+          _defaultPosition = LatLng(
+            locations.first.latitude,
+            locations.first.longitude,
+          );
         });
       }
     } catch (e) {
@@ -52,23 +54,25 @@ class EventsMapPageState extends State<EventsMapPage> {
 
   Future<void> _searchAddress() async {
     try {
-      List<Location> locations =
-          await locationFromAddress(_addressController.text);
+      List<Location> locations = await locationFromAddress(
+        _addressController.text,
+      );
       if (locations.isNotEmpty) {
         setState(() {
-          _searchedLocation =
-              LatLng(locations.first.latitude, locations.first.longitude);
+          _searchedLocation = LatLng(
+            locations.first.latitude,
+            locations.first.longitude,
+          );
         });
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error finding address: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error finding address: $e')));
     }
   }
 
   void _onMarkerTap(String markerId) {
-    
     print(_selectedMarkerId);
     widget.onRequestClearMenu?.call();
 
@@ -91,17 +95,9 @@ class EventsMapPageState extends State<EventsMapPage> {
     }
 
     final markers = [
-      {
-        'id': 'default',
-        'position': _defaultPosition!,
-        'color': Colors.blue,
-      },
+      {'id': 'default', 'position': _defaultPosition!, 'color': Colors.blue},
       if (_searchedLocation != null)
-        {
-          'id': 'searched',
-          'position': _searchedLocation!,
-          'color': Colors.red,
-        }
+        {'id': 'searched', 'position': _searchedLocation!, 'color': Colors.red},
     ];
 
     return Column(
@@ -129,16 +125,15 @@ class EventsMapPageState extends State<EventsMapPage> {
         ),
 
         // DEBUG INFO BOX - show current popup status
-        Container(
-          color: Colors.black87,
-          padding: const EdgeInsets.all(8),
-          margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          child: Text(
-            'Debug: selectedMarkerId = ${_selectedMarkerId ?? "none"}\nPopup open = ${_selectedMarkerId != null}',
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-          ),
-        ),
-
+        // Container(
+        //   color: Colors.black87,
+        //   padding: const EdgeInsets.all(8),
+        //   margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        //   child: Text(
+        //     'Debug: selectedMarkerId = ${_selectedMarkerId ?? "none"}\nPopup open = ${_selectedMarkerId != null}',
+        //     style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        //   ),
+        // ),
         Expanded(
           child: FlutterMap(
             options: MapOptions(
@@ -154,52 +149,57 @@ class EventsMapPageState extends State<EventsMapPage> {
             ),
             children: [
               TileLayer(
-                urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                urlTemplate:
+                    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
                 subdomains: const ['a', 'b', 'c'],
                 userAgentPackageName: 'com.example.app',
               ),
               MarkerLayer(
-                markers: markers.map((marker) {
-                  final isOpen = _selectedMarkerId == marker['id'];
-                  return Marker(
-                    width: 80,
-                    height: isOpen ? 140 : 80,
-                    point: marker['position'] as LatLng,
-                    child: GestureDetector(
-                      behavior: HitTestBehavior.translucent,
-                      onTap: () {
-                        print('Marker ${marker['id']} tapped');
-                        _onMarkerTap(marker['id'] as String);
-                      },
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (isOpen)
-                            GestureDetector(
-                              onTap: () {
-                                print('Popup content tapped - do nothing');
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.all(4),
-                                margin: const EdgeInsets.only(bottom: 4),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  border: Border.all(color: Colors.grey),
-                                  borderRadius: BorderRadius.circular(4),
+                markers:
+                    markers.map((marker) {
+                      final isOpen = _selectedMarkerId == marker['id'];
+                      return Marker(
+                        width: 80,
+                        height: isOpen ? 140 : 80,
+                        point: marker['position'] as LatLng,
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.translucent,
+                          onTap: () {
+                            print('Marker ${marker['id']} tapped');
+                            _onMarkerTap(marker['id'] as String);
+                          },
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (isOpen)
+                                GestureDetector(
+                                  onTap: () {
+                                    print('Popup content tapped - do nothing');
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.all(4),
+                                    margin: const EdgeInsets.only(bottom: 4),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      border: Border.all(color: Colors.grey),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: const Text(
+                                      'Event Details Here',
+                                      style: TextStyle(fontSize: 12),
+                                    ),
+                                  ),
                                 ),
-                                child: const Text(
-                                  'Event Details Here',
-                                  style: TextStyle(fontSize: 12),
-                                ),
+                              Icon(
+                                Icons.location_pin,
+                                color: marker['color'] as Color,
+                                size: 40,
                               ),
-                            ),
-                          Icon(Icons.location_pin,
-                              color: marker['color'] as Color, size: 40),
-                        ],
-                      ),
-                    ),
-                  );
-                }).toList(),
+                            ],
+                          ),
+                        ),
+                      );
+                    }).toList(),
               ),
             ],
           ),

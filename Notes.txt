@@ -1,0 +1,212 @@
+Work done:
+
+Week (12 to 18 of January)
+
+- Made some spaces in my computer (14-01-2025)
+- Started and settled up the project management with Asana (Kanban) for our app (14-01-2025)
+- Started to learn the syntaxes and how to use the dart language (similar to C# and Java) (14-01-2025)
+- Proceeded with installations of VS Code with Flutter sdk(Flutter Tools kit) (16-01-2025)
+- Followed a tutorial to make my very first flutter project (Calculator app) (16-01-2025) (NOT FINISHED)
+- Created account and followed a tutorial to settle up GenyMotion/VM to VS Code (18-01-2025)
+- Made a post in a forum to know if the virtual device I'll use really matter to test later on my real phone (18-01-2025)
+- Downloaded/installed Android Studio to get Android SDK (toolkits to use virtual devices) (18-01-2025)
+
+Week (19 to 25 of January)
+
+- Tried to link the virtual device to VS code (19-01-2025)
+- uninstalled Genymotion (Computer has not enough performance to run it properly) (19-01-2025)
+- Installed LDPlayer as an alternate option (19-01-2025)
+- Connected LDPlayer on VSCode (Solution of ChatGPT) (19-01-2025)
+- Fixed an error while trying to run the emulator from VS Code (JAVA_HOME) (Still some errors...) (21-01-2025)
+- Fixed the problem with Java jdk version (23-01-2025)
+- Fixed the environment system variables and path (23-01-2025)
+- Fixed the app that was giving an error while trying to be installed into the emulator (23-01-2025)
+- The test app works perfectly on the emulator! (23-01-2025)
+
+Week (26 to 1 of February)
+
+- Uninstalled old extensions that're not necessaries (27-01-2025)
+- Took notes for the definitions of importants keyword, functions, etc. (27-01-2025)
+- Added/modified tasks in Asana (27-01-2025)
+- Continue learning the tutorial about how to create my first mobile app (27-01-2025)
+- Finished the first tutorial - Simple calculator (get the sum of 2 numbers) (28-01-2025)
+- Created the GitHub local/remote repos (28-01-2025)
+- Started the second project tutorial (30-01-2025)
+
+Week (2 to 8 of February)
+
+- Continued following the second project tutorial (02-02-2025) (Stopped at 38:44)
+- Finished the second project tutorial (03-02-2025)
+- Started and finished a tutorial on how to create a simple Calendar view (04-01-2025)
+
+Week (9 to 15 of February)
+
+- Started my first own app (Being killed by a random bug that does not want to be fixed / Fixed the bug by just restarting VS Code) (09-01-2025)
+- Made all the pages functionals with proper positions and with an home page button in each pages. (09-01-2025)
+
+Week (16 to 22 of February)
+
+- Added some background color to the buttons related to the current pages we're on (16-02-2025)
+- Fixed the problem with the back arrow that was always showing even on the first instance while running the app (16-02-2025)
+- Implemented the folders for the images (16-02-2025)
+- Made the background fill all the background in the Home Page and modified the texts in the other pages to fit visually with the background color (16-02-2025)
+- Added a black circle behind the back arrow to make it more visible on the other pages, but needs to be centered. An error occured for the second time and I was not able to fix the position yet (17-02-2025)
+- Tried to fix the pathexception error for the used images for the Home page without success. It is preventing me from building the app and required a reboot of the whole computer everytime it happens (17-02-2025)
+- Note: The error disappeared again. Next time it occurs I will try to fix it (18-02-2025)
+- Moved the whole git local repository outside of OneDrive for fix trial against the error (18-02-2025)
+- Flutter seems to be unrecognizable. I will fix this next week (18-02-2025)
+
+Week (23 to 1 of March)
+
+- Fixed flutter (23-02-2025)
+- Struggled with the project's parent folder renaming to remove the spaces which could lead to incompatibility with some files in the project (The project's files are now untracked...) (23-02-2025)
+- Fixed the untracked files (23-02-2025) (note: Let's hope that it will finally fix the images issue)
+- Fixed the untracked files for android/app folder's files (23-02-2025)
+- Added a "FlipCard" Widget with some logics (23-02-2025)
+- Modified the AndroidManifest.xml file to add some user permission to upload an image in the upload page (23-02-2025)
+- Push the changes in GitHub (23-02-2025)
+
+Week (2 to 8 of March)
+
+- Fixed the bottomNavigationBar's background that was not transparent so it was not looking good aesthetically (02-03-2025)
+- Started and finished the Upload page to upload an image and display it on the page. (02-03-2025)
+- Centered the widgets in the Upload page (03-03-2025)
+- Integrated flutter_agenda but removed it as it looked like it was an abandoned widget (03-03-2025)
+- Integrated table_calendar to the Calendar page by peeking through the code in this library's git instead of using chat gpt. Now I can use chat gpt to customize a little more the page (03-03-2025)
+- The Calendar page now has a year/month navigator (03-03-2025)
+- Added the event's page logic. All works except that when we change the date from the event page instead of in the calendar, it keeps the date we chose in the calendar (06-03-2025)
+
+Week (9 to 15 of March)
+
+- Got back the same error that prevents me from building the app. I could not find the solution so I made a post for help in a Flutter's forum. (09-03-2025)
+- With someone's help, I downloaded an app to know what is calling the file, so next time I get this error, I will know what is causing this (10-03-2025)
+- Fixed the problem while choosing another day than the actual day in the event page (10-03-2025)
+- Finished the project "my own project" (10-03-2025)
+- Created the next project - Phone contacts (For learning how to use an authenticator and how to integrate a DB into this flutter app (10-03-2025)
+- Found a guide to follow on YouTube to create an authenticated step with a database to the app with supabase (12-03-2025)
+- Create an organization for the project in Supabase linked with my git (12-03-2025)
+- Followed the guide (12-03-2025)
+- Continued to follow the guide (15-03-2025)
+
+Week (16 to 22 of March)
+
+- Continued to follow the guide, got an error, figured out what the problem was: To log into the account page, we send an email to our own email address, but to do that, we need to open the link in the email through LDPlayer to make it work (16-03-2025)
+- Finished the guide. Next step: Create the phone contact page (16-03-2025)
+- Got an exception which was blocking the app. The exception was about the expired token which was not refresh when it was occuring (16-02-2025)
+- Added a logout button to log out of the account page (16-03-2025)
+- Created the new page for the phone contacts (17-03-2025)
+- Created the new table for the phone contacts in the database and added some dummy values for testing next week (17-03-2025)
+
+Week (23 to 29 of March)
+
+- Fixed the Phone contacts page. Need to tests with more than 1 phone contacts (23-03-2025)
+- Added another rows with dummy values. Project done (23-03-2025)
+- Created the new repository for the real project (23-03-2025)
+- Created the project and named it events-pa as a sample name for now (23-03-2025)
+- Created the Supabase project online and settled it in the flutter project (23-03-2025)
+- Created the pages for the authenticator, reset password and signup page. Cannot test them yet as I need to create the tables in supabase (23-03-2025)
+- Created the table "users". Note that we don't need to stack the passwords in a table. Supabase auth already manage the passwords in a secure way. (25-03-2025)
+- Created the table "userRoles" and added a relation between those two tables. (25-03-2025)
+
+Week (30 to 5 of April)
+
+- Installed PostgreSQL (A free software used for backups, this will probably save us money instead of subscribing to supabase pro for 25$ a month for backups.) (30-03-2025)
+- After 2 hours of trying to make it works, I never found a way to use PostGreSQL to create backup of the supabase SQL (30-03-2025)
+Note: I will work on that another time. I want to make the pages work along with the data in Supabase.
+- Fixed the email validators for the signup page
+- Worked on the create account page. struggled to make the data getting inserted into supabase, but did not succeeded yet. (02-04-2025)
+
+Week (6 to 12 of April)
+
+- Worked on the signup page's problem: With a query to the users table, check for if the email exists. I could not get the info from the table users from supabase
+	* I unchecked the RLS for the table users. This is not a good practice but I will need to have cloud server later to be able to do queries inside the flutter app
+	  without the need to have permissions to do queries (06-04-2025)
+
+Week (13 to 19 of April)
+
+- Settled the URL Configuration and the Redirect URL (13-04-2025)
+- Downloaded Winmerge to compare any changes between 2 texts (13-04-2025)
+- Tried to make the password reset work, but was not able to fix it yet (13-04-2025)
+- Implemented supabase_auth_ui that is supposed to work better for the login/create/reset password page (16-04-2025)
+- Only added the logic to use the supabase_auth_ui on password_reset page (16-04-2025)
+- Got an error thats preventing the app to run, after many trials, I needed to remove the plugin uni_links and use app_links instead. uni_links does not seem to be much compatible with the latest version of flutter (16-04-2025)
+
+! Note: Next week, make sure that the logic to redirect from the email link directly to the app is working
+
+Week (20 to 26 of April)
+
+- Overworked to fix the problem
+- A person online fixed the problem
+
+Week (27 to 3 of May)
+
+-- Pause, worked too much the weeks earlier
+
+Week (4 to 10 of May)
+
+- Cleaned up supabase data (04-05-2025)
+- Took a look at the changes made by the person online (04-05-2025)
+- The password recovery emails are being sent to the spams, I'm trying to find a way to fix this. (04-05-2025)
+- Installed docker Desktop and supabase local in visual studio (04-05-2025)
+- Re-cloned the git for supabase to fix some errors (04-05-2025)
+- Finally made Docker Desktop run Supabase container (04-05-2025)
+Note: Docker is good to use especially for development. (04-05-2025)
+	* Supabase provides several services (PostgreSQL Auth, Storage, etc.)
+	* Docker compose sets all of these up locally with one command, giving the same backend we'd 
+	  get in production 
+- Note for next week to try to fix the mails being sent to the spam folder:
+	* Take a look at chatgpt's last recommendations:
+		~ SPF, DKIM, and DMARC records are correctly set for your domain.
+		~ The "from" address matches the domain you have configured in your DNS.
+ 		~ Your email content doesn't contain common spam trigger words or formatting issues.
+		~ You're not sending emails too frequently from a new account.
+		~ Consider using a dedicated IP for sending (if available).
+
+
+Week (11 to 17 of May)
+
+- I modified the email reset password template, and it seems to have fixed the problem with sending the email to the spam folder (11-05-2025)
+- Added a package to hide hardcoded variables in a .env file. (11-05-2025)
+- Added the app url, anon_key, etc. in this file and used them as a variable instead of hardcoded values. Tested and it's working (11-05-2025)
+- Fixed the LDPlayer emulator which was no more showing in the list (11-05-2025)
+- Fixed the error about the NDK version (NDK for android is to be able to use C and c++ inside the project) (11-05-2025)
+- Started the Account page logic (13-05-2025)
+- Cleaned some data in supabase (14-05-2025)
+- Fixed some errors and added 2 fields in the page (email as a Text, and firstName as a TextField) (15-05-2025)
+
+Week (18 to 24 of May)
+
+- Added some logic to update the user. It gives an error actually (18-05-2025)
+- Fixed the error (20-05-2025)
+- Added validators to the fields (20-05-2025)
+- Added the rest of the fields and improved some alignments to the page (21-05-2025)
+- Added a new custom widget to add a SideMenu to the left of the page for the activities, events, calendar and such (23-05-2025) 
+
+Week (25 to 31 of May)
+
+- Created and worked on the events_map page (25-05-2025)
+- Analyzed and created the table events along with its fields (29-05-2025)
+
+Week (1 to 7 of June)
+
+- Made some search to know what I will need to do to let the user add images to their events (01-06-2025)
+- Modified the table "Events" to have the fields Description and eventAddress
+- Struggled but made 2/3 things work in the events_map page. When I open a marker's popup by pressing on a marker, it closes the popup when I press elsewhere. 
+	- Next step: When I open any section of the toolbox, I want the current opened section's popup to close when I press anywhere on the map
+
+Week (8 to 14 of June)
+
+- Now when you press anywhere on the map or even in a marker, it closes any opened section on the left (09-06-2025)
+- Configured the app on the new computer (13-06-2025)
+
+Week (15 to 21 of June)
+
+- Fixed the logic for the password in the account page which was giving an error when the fields were null and we clicked on the Update button (15-06-2025)
+- Made the sections on the left their own widget to be more flexible with the logics (15-06-2025)
+- 
+
+
+Vérifier avec Guillaume:
+- Si un abonnement est dû avant la date de l'événement, comment on va gérer la priorité de l'événement? 
+Est-ce qu'on laisse la priorité telle quelle, et qu'on se base quand même sur la date la plus 
+récente de l'abonnement, même si échu?

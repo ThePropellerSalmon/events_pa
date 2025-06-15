@@ -1,0 +1,9 @@
+1 - Open VS Code
+2 - Open LDPlayer
+3 - On lDMultiPlayer, ensure that in settings, the ADB debugging is set to Local Connect
+4 - Run the Player (virtual device)
+5 - Open Command prompt
+6 - Type: cd C:\Users\marti\AppData\Local\Android\Sdk\platform-tools
+7 - To ensure that the device is connected to the port-5556, type: adb devices
+8 - Type: flutter run -d emulator-5556
+9 - On VS Code, it should appear as connected
