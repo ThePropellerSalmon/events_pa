@@ -141,12 +141,16 @@ class SideMenuScaffoldState extends State<SideMenuScaffold> {
                     Positioned(
                       top: section.offsetFromTop,
                       left: section.offsetFromLeft,
-                      child: Container(
-                        width: section.width,
-                        height: section.height,
-                        color: Colors.white.withOpacity(0.9),
-                        padding: const EdgeInsets.all(16),
-                        child: section.widget,
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.translucent,
+                        onTap: () {}, // absorb taps inside section
+                        child: Container(
+                          width: section.width,
+                          height: section.height,
+                          color: Colors.white.withOpacity(0.9),
+                          padding: const EdgeInsets.all(16),
+                          child: section.widget,
+                        ),
                       ),
                     ),
                 ],
