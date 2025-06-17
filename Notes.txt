@@ -204,7 +204,16 @@ Week (15 to 21 of June)
 - Fixed the logic for the password in the account page which was giving an error when the fields were null and we clicked on the Update button (15-06-2025)
 - Made the sections on the left their own widget to be more flexible with the logics (15-06-2025)
 - Fixed the sections where they were closing when we pressed anywhere inside them (15-06-2025)
+- Added the field "Title" to the table "events" for the events section (15-06-2025)
+- Added dummy entries for further testing for when the event page logics will be added (15-06-2025)
+- Created the table "locations" (17-06-2025)
+- Added 3 locations as entries for further testing (Shippagan, Tracadie, Caraquet) (17-06-2025)
+- Started the logic for the events section (17-06-2025)
+
+Week (22 to 28 of June)
+
 - 
+
 
 
 Vérifier avec Guillaume:

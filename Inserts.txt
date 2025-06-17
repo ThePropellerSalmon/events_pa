@@ -1,0 +1,4 @@
+Events
+
+INSERT INTO events
+VALUES (3, 'C', false, '2025-06-15 16:30', '2025-06-17 15:00', true, '2df49152-0334-425d-a14f-d81de29b3930', 'Today is hot! Let us have fun at the beach!', '1234 Random Street, Tracadie, E1X-9N9', 'Beach party')
