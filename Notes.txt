@@ -212,11 +212,22 @@ Week (15 to 21 of June)
 
 Week (22 to 28 of June)
 
+- Talked about the project, tested and inserted fake data (22-06-2025)
 - 
 
+
+
+NOTES:
 
 
 Vérifier avec Guillaume:
 - Si un abonnement est dû avant la date de l'événement, comment on va gérer la priorité de l'événement? 
 Est-ce qu'on laisse la priorité telle quelle, et qu'on se base quand même sur la date la plus 
 récente de l'abonnement, même si échu?
+
+Réponse: Quand un abonnement est échu, la priorité de l'événement descend, ce qui fait que ça va automatiquement faire descendre l'événement dans la liste
+
+
+- La priorité ne devrait pas être lié à l'utilisateur au lieu de l'événement?
+
+Réponse: 

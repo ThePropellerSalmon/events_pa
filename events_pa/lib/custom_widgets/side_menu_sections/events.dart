@@ -10,11 +10,17 @@ class Events extends StatefulWidget {
 
 class _EventsState extends State<Events> {
   final _client = Supabase.instance.client;
-
-  List<List<Map<String, dynamic>>> _eventsByDay = [[], [], []];
-  bool _loading = true;
-
   final Map<String, int> _priorityOrder = {'A': 0, 'B': 1, 'C': 2, 'D': 3};
+
+  bool _loading = true;
+  Map<DateTime, List<Map<String, dynamic>>> _eventsByDate = {};
+  final int _daysToLoad = 60;
+
+  late final DateTime _startOfToday = DateTime(
+    DateTime.now().year,
+    DateTime.now().month,
+    DateTime.now().day,
+  );
 
   @override
   void initState() {
@@ -23,52 +29,35 @@ class _EventsState extends State<Events> {
   }
 
   Future<void> _fetchAllEvents() async {
-    final today = DateTime.now();
-    final startOfToday = DateTime(today.year, today.month, today.day);
-    final endOfAfterTomorrow = startOfToday
-        .add(const Duration(days: 3))
-        .subtract(const Duration(seconds: 1));
-    final dateRange = List.generate(
-      3,
-      (i) => startOfToday.add(Duration(days: i)),
-    );
+    final endOfRange = _startOfToday.add(Duration(days: _daysToLoad - 1));
 
-    // Fetch all users with their subscriptionDate
-    final usersRes = await _client
-        .from('users')
-        .select('userId, subscriptionDate');
-    final users = (usersRes as List).cast<Map<String, dynamic>>();
-
-    final userSubscriptionMap = {
-      for (var u in users)
-        u['userId']: _parseNullableDate(u['subscriptionDate']),
-    };
-
+    // Fetch events in range
     final eventsRes = await _client
         .from('events')
         .select()
-        .lte(
-          'eventStartDate',
-          endOfAfterTomorrow.toIso8601String(),
-        ) // Starts on or before 2 days later at 23:59:59
-        .gte(
-          'eventEndDate',
-          startOfToday.toIso8601String(),
-        ); // Ends on or after today at 00:00:00
+        .lte('eventStartDate', endOfRange.toIso8601String())
+        .gte('eventEndDate', _startOfToday.toIso8601String());
 
     final events = (eventsRes as List).cast<Map<String, dynamic>>();
 
-    List<List<Map<String, dynamic>>> tempEventsByDay = [[], [], []];
+    // Group by day
+    final Map<DateTime, List<Map<String, dynamic>>> tempEventsByDate = {};
+    final allDates = List.generate(
+      _daysToLoad,
+      (i) => _startOfToday.add(Duration(days: i)),
+    );
 
-    for (int i = 0; i < 3; i++) {
-      final currentDay = dateRange[i];
+    for (final day in allDates) {
       final dailyEvents = <Map<String, dynamic>>[];
 
       for (var event in events) {
         final start = DateTime.parse(event['eventStartDate']);
         final end = DateTime.parse(event['eventEndDate']);
 
-        if (!currentDay.isBefore(start) && !currentDay.isAfter(end)) {
+        final startDate = DateTime(start.year, start.month, start.day);
+        final endDate = DateTime(end.year, end.month, end.day);
+
+        if (!day.isBefore(startDate) && !day.isAfter(endDate)) {
           dailyEvents.add(event);
         }
       }
@@ -78,93 +67,97 @@ class _EventsState extends State<Events> {
         final prioB = _priorityOrder[b['priority']] ?? 999;
         if (prioA != prioB) return prioA.compareTo(prioB);
 
-        final startA = DateTime.parse(a['eventStartDate']);
-        final startB = DateTime.parse(b['eventStartDate']);
-        if (startA != startB) return startA.compareTo(startB);
-
-        final subA = userSubscriptionMap[a['userId']];
-        final subB = userSubscriptionMap[b['userId']];
-        return _compareNullableDates(subA, subB);
+        final addedA = DateTime.tryParse(a['eventAddedDate'] ?? '');
+        final addedB = DateTime.tryParse(b['eventAddedDate'] ?? '');
+        return _compareNullableDates(addedA, addedB);
       });
 
-      tempEventsByDay[i] = dailyEvents;
+      tempEventsByDate[day] = dailyEvents;
     }
 
     setState(() {
-      _eventsByDay = tempEventsByDay;
+      _eventsByDate = tempEventsByDate;
       _loading = false;
     });
   }
 
-  DateTime? _parseNullableDate(dynamic value) {
-    if (value == null) return null;
-    try {
-      return DateTime.parse(value);
-    } catch (_) {
-      return null;
-    }
-  }
-
   int _compareNullableDates(DateTime? a, DateTime? b) {
     if (a == null && b == null) return 0;
-    if (a == null) return 1; // null is "latest"
+    if (a == null) return 1;
     if (b == null) return -1;
     return a.compareTo(b);
   }
 
+  String _dateLabel(DateTime date) {
+    final today = _startOfToday;
+    final dayDiff = date.difference(today).inDays;
+
+    if (dayDiff == 0) return 'Today';
+    if (dayDiff == 1) return 'Tomorrow';
+    return '${date.month}/${date.day}';
+  }
+
   @override
   Widget build(BuildContext context) {
-    final labels = List.generate(3, (i) {
-      final date = DateTime.now().add(Duration(days: i));
-      return i == 0 ? 'Today' : '${date.month}/${date.day}';
-    });
+    if (_loading) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
-    return _loading
-        ? const Center(child: CircularProgressIndicator())
-        : Column(
+    final totalPages = (_daysToLoad / 3).ceil();
+
+    return PageView.builder(
+      itemCount: totalPages,
+      itemBuilder: (context, pageIndex) {
+        final pageDates = List.generate(
+          3,
+          (i) => _startOfToday.add(Duration(days: pageIndex * 3 + i)),
+        );
+
+        return Column(
           children: [
+            // Header labels
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children:
-                  labels
-                      .map(
-                        (label) => Expanded(
-                          child: Center(
-                            child: Text(
-                              label,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
+                  pageDates.map((date) {
+                    return Expanded(
+                      child: Center(
+                        child: Text(
+                          _dateLabel(date),
+                          style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
-                      )
-                      .toList(),
+                      ),
+                    );
+                  }).toList(),
             ),
             const SizedBox(height: 10),
+            // Event columns
             Expanded(
               child: Row(
-                children: List.generate(3, (i) {
-                  final events = _eventsByDay[i];
-                  return Expanded(
-                    child: ListView.builder(
-                      itemCount: events.length,
-                      itemBuilder: (context, index) {
-                        final event = events[index];
-                        return Card(
-                          margin: const EdgeInsets.all(6),
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text('${event['title'] ?? 'No Title'}'),
-                          ),
-                        );
-                      },
-                    ),
-                  );
-                }),
+                children:
+                    pageDates.map((date) {
+                      final events = _eventsByDate[date] ?? [];
+                      return Expanded(
+                        child: ListView.builder(
+                          itemCount: events.length,
+                          itemBuilder: (context, index) {
+                            final event = events[index];
+                            return Card(
+                              margin: const EdgeInsets.all(6),
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text('${event['title'] ?? 'No Title'}'),
+                              ),
+                            );
+                          },
+                        ),
+                      );
+                    }).toList(),
               ),
             ),
           ],
         );
+      },
+    );
   }
 }
