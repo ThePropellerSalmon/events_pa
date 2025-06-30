@@ -213,8 +213,14 @@ Week (15 to 21 of June)
 Week (22 to 28 of June)
 
 - Talked about the project, tested and inserted fake data (22-06-2025)
-- 
+- Fixed the logic for the events section (26-06-2025)
 
+
+Week (29 to 5 of July)
+
+- Created the event_detailed_overlay (29-06-2025)
+- Finished the event_detailed_overlay (29-06-2025)
+- 
 
 
 NOTES:

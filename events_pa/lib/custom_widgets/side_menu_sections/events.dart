@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'events_section/event_detailed_overlay.dart';
 
 class Events extends StatefulWidget {
   const Events({super.key});
@@ -15,6 +16,8 @@ class _EventsState extends State<Events> {
   bool _loading = true;
   Map<DateTime, List<Map<String, dynamic>>> _eventsByDate = {};
   final int _daysToLoad = 60;
+
+  Map<String, dynamic>? _selectedEvent;
 
   late final DateTime _startOfToday = DateTime(
     DateTime.now().year,
@@ -97,6 +100,39 @@ class _EventsState extends State<Events> {
     return '${date.month}/${date.day}';
   }
 
+  String _formatDateRange(String start, String end) {
+    final startDate = DateTime.parse(start);
+    final endDate = DateTime.parse(end);
+
+    if (startDate.year == endDate.year &&
+        startDate.month == endDate.month &&
+        startDate.day == endDate.day) {
+      return '${_formatDate(startDate)}';
+    } else {
+      return '${_formatDate(startDate)} to ${_formatDate(endDate)}';
+    }
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}';
+  }
+
+  String _formatTime(String isoString) {
+    final dateTime = DateTime.parse(isoString);
+    return '[${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}]';
+  }
+
+  Widget _buildTimeBox(String time) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.black54),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(time, style: const TextStyle(fontSize: 16)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_loading) {
@@ -105,59 +141,78 @@ class _EventsState extends State<Events> {
 
     final totalPages = (_daysToLoad / 3).ceil();
 
-    return PageView.builder(
-      itemCount: totalPages,
-      itemBuilder: (context, pageIndex) {
-        final pageDates = List.generate(
-          3,
-          (i) => _startOfToday.add(Duration(days: pageIndex * 3 + i)),
-        );
+    return Stack(
+      children: [
+        PageView.builder(
+          itemCount: totalPages,
+          itemBuilder: (context, pageIndex) {
+            final pageDates = List.generate(
+              3,
+              (i) => _startOfToday.add(Duration(days: pageIndex * 3 + i)),
+            );
 
-        return Column(
-          children: [
-            // Header labels
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children:
-                  pageDates.map((date) {
-                    return Expanded(
-                      child: Center(
-                        child: Text(
-                          _dateLabel(date),
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-            ),
-            const SizedBox(height: 10),
-            // Event columns
-            Expanded(
-              child: Row(
-                children:
-                    pageDates.map((date) {
-                      final events = _eventsByDate[date] ?? [];
-                      return Expanded(
-                        child: ListView.builder(
-                          itemCount: events.length,
-                          itemBuilder: (context, index) {
-                            final event = events[index];
-                            return Card(
-                              margin: const EdgeInsets.all(6),
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text('${event['title'] ?? 'No Title'}'),
+            return Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children:
+                      pageDates.map((date) {
+                        return Expanded(
+                          child: Center(
+                            child: Text(
+                              _dateLabel(date),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
                               ),
-                            );
-                          },
-                        ),
-                      );
-                    }).toList(),
-              ),
-            ),
-          ],
-        );
-      },
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                ),
+                const SizedBox(height: 10),
+                Expanded(
+                  child: Row(
+                    children:
+                        pageDates.map((date) {
+                          final events = _eventsByDate[date] ?? [];
+                          return Expanded(
+                            child: ListView.builder(
+                              itemCount: events.length,
+                              itemBuilder: (context, index) {
+                                final event = events[index];
+                                return GestureDetector(
+                                  onTap:
+                                      () => setState(
+                                        () => _selectedEvent = event,
+                                      ),
+                                  child: Card(
+                                    margin: const EdgeInsets.all(6),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Text(
+                                        '${event['title'] ?? 'No Title'}',
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          );
+                        }).toList(),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+
+        // Event detail overlay
+        if (_selectedEvent != null)
+          EventDetailOverlay(
+            event: _selectedEvent!,
+            onClose: () => setState(() => _selectedEvent = null),
+          ),
+      ],
     );
   }
 }
