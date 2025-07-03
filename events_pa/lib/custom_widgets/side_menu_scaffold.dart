@@ -48,9 +48,9 @@ class SideMenuScaffoldState extends State<SideMenuScaffold> {
       widget: const Search(),
     ),
     'events': SectionConfig(
-      width: 280,
+      width: 320,
       height: 500,
-      offsetFromLeft: 20,
+      offsetFromLeft: 0,
       offsetFromTop: 70,
       widget: const Events(),
     ),

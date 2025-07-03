@@ -34,38 +34,67 @@ class _EventsState extends State<Events> {
   Future<void> _fetchAllEvents() async {
     final endOfRange = _startOfToday.add(Duration(days: _daysToLoad - 1));
 
-    // Fetch events in range
-    final eventsRes = await _client
-        .from('events')
-        .select()
+    final eventDatesRes = await _client
+        .from('eventsDates')
+        .select('''
+          eventDateId,
+          eventStartDate,
+          eventEndDate,
+          eventId,
+          events (
+            eventId,
+            title,
+            description,
+            eventAddress,
+            eventAddedDate,
+            userId,
+            users (
+              priority
+            )
+          )
+        ''')
         .lte('eventStartDate', endOfRange.toIso8601String())
-        .gte('eventEndDate', _startOfToday.toIso8601String());
+        .gte('eventStartDate', _startOfToday.toIso8601String());
 
-    final events = (eventsRes as List).cast<Map<String, dynamic>>();
-
-    // Group by day
+    final Map<String, Map<String, dynamic>> groupedEvents = {};
     final Map<DateTime, List<Map<String, dynamic>>> tempEventsByDate = {};
-    final allDates = List.generate(
-      _daysToLoad,
-      (i) => _startOfToday.add(Duration(days: i)),
-    );
 
-    for (final day in allDates) {
-      final dailyEvents = <Map<String, dynamic>>[];
+    for (final dynamic rawEntry in eventDatesRes) {
+      final entry = Map<String, dynamic>.from(rawEntry);
+      final start = DateTime.parse(entry['eventStartDate']);
+      final end = DateTime.parse(entry['eventEndDate']);
+      final event = Map<String, dynamic>.from(entry['events'] ?? {});
+      if (event.isEmpty) continue;
 
-      for (var event in events) {
-        final start = DateTime.parse(event['eventStartDate']);
-        final end = DateTime.parse(event['eventEndDate']);
+      final user = event['users'] ?? {};
+      final priority = user['priority'] ?? 'D';
+      final eventId = event['eventId'].toString();
+      final dateKey = DateTime(start.year, start.month, start.day);
 
-        final startDate = DateTime(start.year, start.month, start.day);
-        final endDate = DateTime(end.year, end.month, end.day);
+      final baseEvent = {
+        ...event,
+        'priority': priority,
+        'eventTimeSlots': <Map<String, dynamic>>[],
+      };
 
-        if (!day.isBefore(startDate) && !day.isAfter(endDate)) {
-          dailyEvents.add(event);
-        }
+      if (!groupedEvents.containsKey(eventId)) {
+        groupedEvents[eventId] = Map<String, dynamic>.from(baseEvent);
       }
 
-      dailyEvents.sort((a, b) {
+      (groupedEvents[eventId]!['eventTimeSlots'] as List<Map<String, dynamic>>)
+          .add({
+            'eventStartDate': entry['eventStartDate'],
+            'eventEndDate': entry['eventEndDate'],
+          });
+
+      tempEventsByDate.putIfAbsent(dateKey, () => []);
+      if (!tempEventsByDate[dateKey]!.contains(groupedEvents[eventId])) {
+        tempEventsByDate[dateKey]!.add(groupedEvents[eventId]!);
+      }
+    }
+
+    for (final date in tempEventsByDate.keys) {
+      tempEventsByDate[date]!.sort((a, b) {
         final prioA = _priorityOrder[a['priority']] ?? 999;
         final prioB = _priorityOrder[b['priority']] ?? 999;
         if (prioA != prioB) return prioA.compareTo(prioB);
@@ -74,8 +103,6 @@ class _EventsState extends State<Events> {
         final addedB = DateTime.tryParse(b['eventAddedDate'] ?? '');
         return _compareNullableDates(addedA, addedB);
       });
-
-      tempEventsByDate[day] = dailyEvents;
     }
 
     setState(() {
@@ -98,39 +125,6 @@ class _EventsState extends State<Events> {
     if (dayDiff == 0) return 'Today';
     if (dayDiff == 1) return 'Tomorrow';
     return '${date.month}/${date.day}';
-  }
-
-  String _formatDateRange(String start, String end) {
-    final startDate = DateTime.parse(start);
-    final endDate = DateTime.parse(end);
-
-    if (startDate.year == endDate.year &&
-        startDate.month == endDate.month &&
-        startDate.day == endDate.day) {
-      return '${_formatDate(startDate)}';
-    } else {
-      return '${_formatDate(startDate)} to ${_formatDate(endDate)}';
-    }
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}';
-  }
-
-  String _formatTime(String isoString) {
-    final dateTime = DateTime.parse(isoString);
-    return '[${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}]';
-  }
-
-  Widget _buildTimeBox(String time) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.black54),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Text(time, style: const TextStyle(fontSize: 16)),
-    );
   }
 
   @override
@@ -206,7 +200,6 @@ class _EventsState extends State<Events> {
           },
         ),
 
-        // Event detail overlay
         if (_selectedEvent != null)
           EventDetailOverlay(
             event: _selectedEvent!,

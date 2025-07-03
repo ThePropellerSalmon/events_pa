@@ -220,6 +220,9 @@ Week (29 to 5 of July)
 
 - Created the event_detailed_overlay (29-06-2025)
 - Finished the event_detailed_overlay (29-06-2025)
+- Created the table eventsDates (03-07-2025)
+- Removed Priority, eventStartDate and eventEndDate from the table events (03-07-2025)
+- Added Priority in the table users and eventStartDate and eventEndDate in the table eventsDates (03-07-2025)
 - 
 
 
@@ -236,4 +239,4 @@ Réponse: Quand un abonnement est échu, la priorité de l'événement descend, 
 
 - La priorité ne devrait pas être lié à l'utilisateur au lieu de l'événement?
 
-Réponse: 
+Réponse: Oui
