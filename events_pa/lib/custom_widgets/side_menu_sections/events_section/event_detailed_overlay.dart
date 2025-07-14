@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-class EventDetailOverlay extends StatelessWidget {
+class EventDetailOverlay extends StatefulWidget {
   final Map<String, dynamic> event;
   final VoidCallback onClose;
 
@@ -9,6 +10,48 @@ class EventDetailOverlay extends StatelessWidget {
     required this.event,
     required this.onClose,
   });
+
+  @override
+  State<EventDetailOverlay> createState() => _EventDetailOverlayState();
+}
+
+class _EventDetailOverlayState extends State<EventDetailOverlay> {
+  List<String> _imageUrls = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadEventImages();
+  }
+
+  Future<void> _loadEventImages() async {
+    final eventId = widget.event['eventId'];
+    if (eventId == null) return;
+
+    try {
+      final response = await Supabase.instance.client
+          .from('eventsImages')
+          .select('path')
+          .eq('eventId', eventId);
+
+      final paths = (response as List).cast<Map<String, dynamic>>();
+      final urls =
+          paths.map((row) {
+            final path = row['path'];
+            final publicUrl = Supabase.instance.client.storage
+                .from('events')
+                .getPublicUrl(path);
+
+            return publicUrl; // this is a string now
+          }).toList();
+
+      setState(() {
+        _imageUrls = urls;
+      });
+    } catch (e) {
+      debugPrint('Error loading event images: $e');
+    }
+  }
 
   String _formatDate(DateTime date) {
     return '${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}';
@@ -22,9 +65,10 @@ class EventDetailOverlay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<Map<String, dynamic>> timeSlots =
-        (event['eventTimeSlots'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+        (widget.event['eventTimeSlots'] as List?)
+            ?.cast<Map<String, dynamic>>() ??
+        [];
 
-    // Sort by start time
     timeSlots.sort((a, b) {
       final startA =
           DateTime.tryParse(a['eventStartDate'] ?? '') ?? DateTime(2000);
@@ -48,17 +92,17 @@ class EventDetailOverlay extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Header with back arrow
+                  // Back button and title
                   Row(
                     children: [
                       IconButton(
                         icon: const Icon(Icons.arrow_back),
-                        onPressed: onClose,
+                        onPressed: widget.onClose,
                       ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          event['title'] ?? 'No Title',
+                          widget.event['title'] ?? 'No Title',
                           style: const TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
@@ -69,9 +113,9 @@ class EventDetailOverlay extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
 
-                  if (event['eventAddress'] != null)
+                  if (widget.event['eventAddress'] != null)
                     Text(
-                      event['eventAddress'],
+                      widget.event['eventAddress'],
                       style: const TextStyle(
                         fontStyle: FontStyle.italic,
                         color: Colors.black87,
@@ -80,9 +124,9 @@ class EventDetailOverlay extends StatelessWidget {
 
                   const SizedBox(height: 10),
 
-                  if (event['description'] != null)
+                  if (widget.event['description'] != null)
                     Text(
-                      event['description'],
+                      widget.event['description'],
                       style: const TextStyle(fontSize: 16),
                     ),
 
@@ -122,7 +166,35 @@ class EventDetailOverlay extends StatelessWidget {
                         ],
                       ),
                     );
-                  }).toList(),
+                  }),
+
+                  if (_imageUrls.isNotEmpty) ...[
+                    const SizedBox(height: 24),
+                    // const Text(
+                    //   'Images',
+                    //   style: TextStyle(
+                    //     fontSize: 16,
+                    //     fontWeight: FontWeight.w600,
+                    //   ),
+                    // ),
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 10,
+                      runSpacing: 10,
+                      children:
+                          _imageUrls.map((url) {
+                            return ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.network(
+                                url,
+                                width: 100,
+                                height: 100,
+                                fit: BoxFit.cover,
+                              ),
+                            );
+                          }).toList(),
+                    ),
+                  ],
                 ],
               ),
             ),

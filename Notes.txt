@@ -225,8 +225,27 @@ Week (29 to 5 of July)
 - Added Priority in the table users and eventStartDate and eventEndDate in the table eventsDates (03-07-2025)
 - 
 
+Week (6 to 12 of July)
+
+- Got informed on how to create a bucket and upload images (11-07-2025)
+- Created a bucket in supabase (11-07-2025)
+- Created the table eventsImages for the paths and meta data (11-07-2025)
+- Created policy to allow any users to read table eventsImages (11-07-2025)
+- Added an image to the bucket and created a row in the eventsImages table manually to fit with the image (11-07-2025)
+- 
+
+Week (13 to 19 of July)
+
+- Added the images to the event_detailed_overlay section (14-07-2025)
+- Changed the map provider as the one used was giving errors (14-07-2025)
+- 
+
 
 NOTES:
+
+- Add a method to check if the uploaded image is not a virus
+- Add a method to convert the uploaded image into format such as png
+- 
 
 
 Vérifier avec Guillaume:
@@ -237,6 +256,3 @@ récente de l'abonnement, même si échu?
 Réponse: Quand un abonnement est échu, la priorité de l'événement descend, ce qui fait que ça va automatiquement faire descendre l'événement dans la liste
 
 
-- La priorité ne devrait pas être lié à l'utilisateur au lieu de l'événement?
-
-Réponse: Oui
