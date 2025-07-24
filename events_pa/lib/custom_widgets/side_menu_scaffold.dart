@@ -110,6 +110,7 @@ class SideMenuScaffoldState extends State<SideMenuScaffold> {
                     },
                     tooltip: 'Account',
                   ),
+                  const Divider(height: 1, thickness: 1, color: Colors.black),
                   IconButton(
                     icon: const Icon(Icons.search),
                     onPressed: () => _toggleSection('search'),
@@ -126,9 +127,18 @@ class SideMenuScaffoldState extends State<SideMenuScaffold> {
                     tooltip: 'Calendar',
                   ),
                   IconButton(
-                    icon: const Icon(Icons.add_location_outlined),
+                    icon: const Icon(Icons.favorite_border_outlined),
                     onPressed: () => _toggleSection('hobbies'),
                     tooltip: 'Hobbies',
+                  ),
+                  const Divider(height: 1, thickness: 1, color: Colors.black),
+                  IconButton(
+                    icon: const Icon(Icons.add_location_outlined),
+                    onPressed: () {
+                      widget.onSectionOpenOrClick?.call();
+                      context.go('/createEvent');
+                    },
+                    tooltip: 'Create an event',
                   ),
                 ],
               ),

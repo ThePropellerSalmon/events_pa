@@ -20,7 +20,7 @@ class EventsMapPageState extends State<EventsMapPage> {
   String? _selectedMarkerId;
 
   void closePopup() {
-    print('closePopup() called');
+    //print('closePopup() called');
     setState(() {
       _selectedMarkerId = null;
     });
@@ -73,16 +73,16 @@ class EventsMapPageState extends State<EventsMapPage> {
   }
 
   void _onMarkerTap(String markerId) {
-    print(_selectedMarkerId);
+    //print(_selectedMarkerId);
     widget.onRequestClearMenu?.call();
 
-    print('Marker tapped: $markerId');
+    //print('Marker tapped: $markerId');
     setState(() {
       if (_selectedMarkerId == markerId) {
-        print('Tapped same marker, closing popup');
+        //print('Tapped same marker, closing popup');
         _selectedMarkerId = null;
       } else {
-        print('Opening popup for marker $markerId');
+        //print('Opening popup for marker $markerId');
         _selectedMarkerId = markerId;
       }
     });
@@ -174,7 +174,7 @@ class EventsMapPageState extends State<EventsMapPage> {
                               if (isOpen)
                                 GestureDetector(
                                   onTap: () {
-                                    print('Popup content tapped - do nothing');
+                                    //print('Popup content tapped - do nothing');
                                   },
                                   child: Container(
                                     padding: const EdgeInsets.all(4),

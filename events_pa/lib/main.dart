@@ -1,6 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'dart:async';
+import 'package:events_pa/create_event_page.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -40,31 +41,42 @@ void main() async {
 }
 
 GoRouter _router(Listenable refreshListenable) => GoRouter(
-      initialLocation: '/account',
-      debugLogDiagnostics: true,
-      refreshListenable: refreshListenable,
-      navigatorKey: navigatorKey,
-      redirect: (context, state) {
-        final session = Supabase.instance.client.auth.currentSession;
-        final publicRoutes = ['/login', '/signup', '/forgot-password'];
-        debugPrint('Current Path: ${state.fullPath}');
-        debugPrint('Matched Path: ${state.matchedLocation}');
-        if (session == null && !publicRoutes.contains(state.fullPath)) {
-          return '/login';
-        } else {
-          debugPrint('User is allowed to continue to ${state.matchedLocation}');
-          return null;
-        }
-      },
-      routes: [
-        GoRoute(path: '/login', builder: (context, state) => LoginPage()),
-        GoRoute(path: '/signup', builder: (context, state) => SignupPage()),
-        GoRoute(path: '/forgot-password', builder: (context, state) => ForgotPasswordPage()),
-        GoRoute(path: '/update-password', builder: (context, state) => UpdatePasswordPage()),
-        GoRoute(path: '/account', builder: (context, state) => AccountPage()),
-        GoRoute(
-          path: '/events_map',
-          builder: (context, state) => SideMenuScaffold(
+  initialLocation: '/account',
+  debugLogDiagnostics: true,
+  refreshListenable: refreshListenable,
+  navigatorKey: navigatorKey,
+  redirect: (context, state) {
+    final session = Supabase.instance.client.auth.currentSession;
+    final publicRoutes = ['/login', '/signup', '/forgot-password'];
+    debugPrint('Current Path: ${state.fullPath}');
+    debugPrint('Matched Path: ${state.matchedLocation}');
+    if (session == null && !publicRoutes.contains(state.fullPath)) {
+      return '/login';
+    } else {
+      debugPrint('User is allowed to continue to ${state.matchedLocation}');
+      return null;
+    }
+  },
+  routes: [
+    GoRoute(path: '/login', builder: (context, state) => LoginPage()),
+    GoRoute(path: '/signup', builder: (context, state) => SignupPage()),
+    GoRoute(
+      path: '/forgot-password',
+      builder: (context, state) => ForgotPasswordPage(),
+    ),
+    GoRoute(
+      path: '/update-password',
+      builder: (context, state) => UpdatePasswordPage(),
+    ),
+    GoRoute(path: '/account', builder: (context, state) => AccountPage()),
+    GoRoute(
+      path: '/createEvent',
+      builder: (context, state) => CreateEventPage(),
+    ),
+    GoRoute(
+      path: '/events_map',
+      builder:
+          (context, state) => SideMenuScaffold(
             key: sideMenuKey,
             onSectionOpenOrClick: () {
               final mapState = mapKey.currentState;
@@ -84,9 +96,9 @@ GoRouter _router(Listenable refreshListenable) => GoRouter(
               },
             ),
           ),
-        ),
-      ],
-    );
+    ),
+  ],
+);
 
 class MainApp extends StatefulWidget {
   const MainApp({super.key});
@@ -115,9 +127,7 @@ class _MainAppState extends State<MainApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      routerConfig: _router(_authStateListenable),
-    );
+    return MaterialApp.router(routerConfig: _router(_authStateListenable));
   }
 }
 

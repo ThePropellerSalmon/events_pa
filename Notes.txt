@@ -238,7 +238,17 @@ Week (13 to 19 of July)
 
 - Added the images to the event_detailed_overlay section (14-07-2025)
 - Changed the map provider as the one used was giving errors (14-07-2025)
+- Commented out some print (17-07-2025)
+- Classified the sections/pages on the event map page for a better organization (17-07-2025)
+- Created the empty page for the event creation with a return button (17-07-2025)
 - 
+
+Week (20 to 26 of July)
+
+- Started the logic for the create event page (22-07-2025)
+- Continued the logic for the create event page (24-07-2025)
+- 
+
 
 
 NOTES:
