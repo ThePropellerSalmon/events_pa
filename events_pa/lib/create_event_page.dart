@@ -27,6 +27,15 @@ class _CreateEventPageState extends State<CreateEventPage> {
   List<File> _uploadedImages = [];
   List<Map<String, dynamic>> _manualDates = [];
 
+  // Recurring values
+  DateTime? _recurringStartDate;
+  DateTime? _recurringEndDate;
+  TimeOfDay? _recurringStartTime;
+  TimeOfDay? _recurringEndTime;
+
+  // Validation error message for recurring schedule
+  String? _recurringValidationError;
+
   void _handleImageChange(List<File> images) {
     setState(() {
       _uploadedImages = images;
@@ -42,6 +51,17 @@ class _CreateEventPageState extends State<CreateEventPage> {
     );
 
     if (selectedDate == null) return;
+
+    // Check date is not in the past
+    final nowDate = DateTime.now();
+    if (selectedDate.isBefore(
+      DateTime(nowDate.year, nowDate.month, nowDate.day),
+    )) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Date cannot be in the past')),
+      );
+      return;
+    }
 
     final startTime = await showTimePicker(
       context: context,
@@ -84,82 +104,189 @@ class _CreateEventPageState extends State<CreateEventPage> {
     super.dispose();
   }
 
+  bool _validateRecurringFields() {
+    String? error;
+
+    if (_recurringStartDate == null ||
+        _recurringEndDate == null ||
+        _recurringStartTime == null ||
+        _recurringEndTime == null) {
+      error = 'Please complete all recurring date/time fields';
+    } else {
+      final nowDate = DateTime.now();
+      if (_recurringStartDate!.isBefore(
+        DateTime(nowDate.year, nowDate.month, nowDate.day),
+      )) {
+        error = 'Recurring start date cannot be in the past';
+      } else if (_recurringEndDate!.isBefore(_recurringStartDate!)) {
+        error = 'Recurring end date cannot be before start date';
+      } else {
+        final startMinutes =
+            (_recurringStartTime!.hour * 60) + _recurringStartTime!.minute;
+        final endMinutes =
+            (_recurringEndTime!.hour * 60) + _recurringEndTime!.minute;
+        if (endMinutes <= startMinutes) {
+          error = 'Recurring end time must be after start time';
+        }
+      }
+    }
+
+    setState(() {
+      _recurringValidationError = error;
+    });
+
+    return error == null;
+  }
+
   void _submitForm() async {
-    if (_formKey.currentState!.validate()) {
-      final title = _titleController.text.trim();
-      final description = _descriptionController.text.trim();
-      final label = _labelController.text.trim();
-      final street = _streetController.text.trim();
-      final city = _cityController.text.trim();
-      final postalCode = _postalCodeController.text.trim();
-      final images = _uploadedImages;
+    if (!_formKey.currentState!.validate()) return;
 
-      try {
-        final supabase = Supabase.instance.client;
+    if (!_manualDatesSelected) {
+      if (!_validateRecurringFields()) {
+        return;
+      }
+    }
 
-        final eventInsert =
-            await supabase
-                .from('events')
-                .insert({
-                  'title': title,
-                  'description': description,
-                  'label': label,
-                  'street': street,
-                  'city': city,
-                  'postal_code': postalCode,
-                  'image_count': images.length,
-                  'created_at': DateTime.now().toIso8601String(),
-                })
-                .select('eventId')
-                .single();
+    final title = _titleController.text.trim();
+    final description = _descriptionController.text.trim();
+    final street = _streetController.text.trim();
+    final city = _cityController.text.trim();
+    final postalCode = _postalCodeController.text.trim();
+    final images = _uploadedImages;
 
-        final eventId = eventInsert['eventId'];
+    try {
+      final supabase = Supabase.instance.client;
+      final userId = supabase.auth.currentUser?.id;
 
-        if (_manualDatesSelected) {
-          for (final slot in _manualDates) {
-            final date = slot['date'] as DateTime;
-            final start = slot['startTime'] as TimeOfDay;
-            final end = slot['endTime'] as TimeOfDay;
+      if (userId == null) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('User not authenticated')));
+        return;
+      }
 
-            final eventStart = DateTime(
-              date.year,
-              date.month,
-              date.day,
-              start.hour,
-              start.minute,
-            );
-            final eventEnd = DateTime(
-              date.year,
-              date.month,
-              date.day,
-              end.hour,
-              end.minute,
-            );
+      // Fetch user's subscription status
+      final user =
+          await supabase
+              .from('users')
+              .select('hasSubscriptionPlan')
+              .eq('userId', userId)
+              .single();
 
+      final hasPaid = user['hasSubscriptionPlan'] == true;
+      final eventAddress = '$street, $city, $postalCode';
+
+      // Insert into events
+      final eventInsert =
+          await supabase
+              .from('events')
+              .insert({
+                'userId': userId,
+                'hasPaid': hasPaid,
+                'isActive': true,
+                'description': description,
+                'eventAddress': eventAddress,
+                'title': title,
+                'eventAddedDate': DateTime.now().toIso8601String(),
+              })
+              .select('eventId')
+              .single();
+
+      final eventId = eventInsert['eventId'];
+
+      // Insert manual or recurring dates
+      if (_manualDatesSelected) {
+        for (final slot in _manualDates) {
+          final date = slot['date'] as DateTime;
+          final start = slot['startTime'] as TimeOfDay;
+          final end = slot['endTime'] as TimeOfDay;
+
+          final eventStart = DateTime(
+            date.year,
+            date.month,
+            date.day,
+            start.hour,
+            start.minute,
+          );
+          final eventEnd = DateTime(
+            date.year,
+            date.month,
+            date.day,
+            end.hour,
+            end.minute,
+          );
+
+          await supabase.from('eventsDates').insert({
+            'eventId': eventId,
+            'eventStartDate': eventStart.toIso8601String(),
+            'eventEndDate': eventEnd.toIso8601String(),
+          });
+        }
+      } else {
+        DateTime date = _recurringStartDate!;
+        while (!date.isAfter(_recurringEndDate!)) {
+          final eventStart = DateTime(
+            date.year,
+            date.month,
+            date.day,
+            _recurringStartTime!.hour,
+            _recurringStartTime!.minute,
+          );
+          final eventEnd = DateTime(
+            date.year,
+            date.month,
+            date.day,
+            _recurringEndTime!.hour,
+            _recurringEndTime!.minute,
+          );
+
+          if (eventEnd.isAfter(eventStart)) {
             await supabase.from('eventsDates').insert({
               'eventId': eventId,
               'eventStartDate': eventStart.toIso8601String(),
               'eventEndDate': eventEnd.toIso8601String(),
             });
           }
+
+          date = date.add(const Duration(days: 1));
         }
-
-        setState(() {
-          _uploadedImages.clear();
-          _manualDates.clear();
-          _formKey.currentState!.reset();
-        });
-
-        if (!mounted) return;
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Event submitted successfully!')),
-        );
-      } catch (error) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Submission failed: $error')));
       }
+
+      // Insert images
+      for (final image in _uploadedImages) {
+        final fileName = image.path.split('/').last;
+        final path = 'images/$eventId/$fileName';
+
+        await supabase.storage.from('events').upload(path, image);
+
+        await supabase.from('eventsImages').insert({
+          'eventId': eventId,
+          'imageAddedDate': DateTime.now().toIso8601String(),
+          'path': path,
+          'size': await image.length(),
+        });
+      }
+
+      setState(() {
+        _uploadedImages.clear();
+        _manualDates.clear();
+        _formKey.currentState!.reset();
+        _recurringStartDate = null;
+        _recurringEndDate = null;
+        _recurringStartTime = null;
+        _recurringEndTime = null;
+        _recurringValidationError = null;
+      });
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Event submitted successfully!')),
+      );
+    } catch (error) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Submission failed: $error')));
     }
   }
 
@@ -192,28 +319,24 @@ class _CreateEventPageState extends State<CreateEventPage> {
               children: [
                 TextFormField(
                   controller: _titleController,
+                  maxLength: 50,
                   decoration: const InputDecoration(labelText: 'Title *'),
-                  validator:
-                      (value) =>
-                          value == null || value.isEmpty ? 'Required' : null,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) return 'Required';
+                    if (value.length > 50) return 'Max 50 characters allowed';
+                    return null;
+                  },
                 ),
                 TextFormField(
                   controller: _descriptionController,
-                  maxLength: 1000,
+                  maxLength: 500,
                   maxLines: 5,
                   decoration: const InputDecoration(labelText: 'Description *'),
-                  validator:
-                      (value) =>
-                          value == null || value.isEmpty ? 'Required' : null,
-                ),
-                TextFormField(
-                  controller: _labelController,
-                  decoration: const InputDecoration(
-                    labelText: 'Label for address *',
-                  ),
-                  validator:
-                      (value) =>
-                          value == null || value.isEmpty ? 'Required' : null,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) return 'Required';
+                    if (value.length > 500) return 'Max 500 characters allowed';
+                    return null;
+                  },
                 ),
                 TextFormField(
                   controller: _streetController,
@@ -240,12 +363,13 @@ class _CreateEventPageState extends State<CreateEventPage> {
                     _CanadianPostalCodeFormatter(),
                   ],
                   validator: (value) {
-                    final regex = RegExp(r'^[A-Z]\d[A-Z] \d[A-Z]\d\$');
+                    final regex = RegExp(r'^[A-Z]\d[A-Z] \d[A-Z]\d$');
                     if (value == null || value.isEmpty) return 'Required';
                     if (!regex.hasMatch(value)) return 'Invalid postal code';
                     return null;
                   },
                 ),
+
                 const SizedBox(height: 24),
                 const Text('Upload up to 3 images (max 5MB each):'),
                 const SizedBox(height: 8),
@@ -253,6 +377,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
                   initialImages: _uploadedImages,
                   onImagesChanged: _handleImageChange,
                 ),
+
                 const SizedBox(height: 32),
                 const Text('Date Options:', style: TextStyle(fontSize: 16)),
                 Row(
@@ -280,40 +405,118 @@ class _CreateEventPageState extends State<CreateEventPage> {
                   ],
                 ),
                 const SizedBox(height: 16),
-                _manualDatesSelected
-                    ? Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        ElevatedButton.icon(
-                          onPressed: _pickManualDate,
-                          icon: const Icon(Icons.calendar_today),
-                          label: const Text('Add Time Slot'),
-                        ),
-                        const SizedBox(height: 12),
-                        if (_manualDates.isEmpty)
-                          const Text('No time slots added yet.'),
-                        ..._manualDates.asMap().entries.map((entry) {
-                          final i = entry.key;
-                          final item = entry.value;
-                          final date = item['date'] as DateTime;
-                          final start = item['startTime'] as TimeOfDay;
-                          final end = item['endTime'] as TimeOfDay;
 
-                          return ListTile(
-                            title: Text(
-                              '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')} | ${start.format(context)} - ${end.format(context)}',
-                            ),
-                            trailing: IconButton(
-                              icon: const Icon(Icons.delete),
-                              onPressed:
-                                  () =>
-                                      setState(() => _manualDates.removeAt(i)),
-                            ),
-                          );
-                        }),
-                      ],
-                    )
-                    : const Placeholder(fallbackHeight: 100),
+                if (_manualDatesSelected) ...[
+                  ElevatedButton.icon(
+                    onPressed: _pickManualDate,
+                    icon: const Icon(Icons.calendar_today),
+                    label: const Text('Add Time Slot'),
+                  ),
+                  const SizedBox(height: 12),
+                  if (_manualDates.isEmpty)
+                    const Text('No time slots added yet.'),
+                  ..._manualDates.asMap().entries.map((entry) {
+                    final i = entry.key;
+                    final item = entry.value;
+                    final date = item['date'] as DateTime;
+                    final start = item['startTime'] as TimeOfDay;
+                    final end = item['endTime'] as TimeOfDay;
+                    return ListTile(
+                      title: Text(
+                        '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')} | ${start.format(context)} - ${end.format(context)}',
+                      ),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.delete),
+                        onPressed:
+                            () => setState(() => _manualDates.removeAt(i)),
+                      ),
+                    );
+                  }),
+                ] else ...[
+                  ListTile(
+                    title: const Text('Start Date'),
+                    subtitle: Text(
+                      _recurringStartDate != null
+                          ? '${_recurringStartDate!.toLocal()}'.split(' ')[0]
+                          : 'Not selected',
+                    ),
+                    trailing: const Icon(Icons.calendar_today),
+                    onTap: () async {
+                      final date = await showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime.now(),
+                        lastDate: DateTime.now().add(const Duration(days: 365)),
+                      );
+                      if (date != null) {
+                        setState(() => _recurringStartDate = date);
+                      }
+                    },
+                  ),
+                  ListTile(
+                    title: const Text('End Date'),
+                    subtitle: Text(
+                      _recurringEndDate != null
+                          ? '${_recurringEndDate!.toLocal()}'.split(' ')[0]
+                          : 'Not selected',
+                    ),
+                    trailing: const Icon(Icons.calendar_today),
+                    onTap: () async {
+                      final date = await showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime.now(),
+                        lastDate: DateTime.now().add(const Duration(days: 365)),
+                      );
+                      if (date != null) {
+                        setState(() => _recurringEndDate = date);
+                      }
+                    },
+                  ),
+                  ListTile(
+                    title: const Text('Start Time'),
+                    subtitle: Text(
+                      _recurringStartTime?.format(context) ?? 'Not selected',
+                    ),
+                    trailing: const Icon(Icons.access_time),
+                    onTap: () async {
+                      final time = await showTimePicker(
+                        context: context,
+                        initialTime: const TimeOfDay(hour: 9, minute: 0),
+                      );
+                      if (time != null) {
+                        setState(() => _recurringStartTime = time);
+                      }
+                    },
+                  ),
+                  ListTile(
+                    title: const Text('End Time'),
+                    subtitle: Text(
+                      _recurringEndTime?.format(context) ?? 'Not selected',
+                    ),
+                    trailing: const Icon(Icons.access_time),
+                    onTap: () async {
+                      final time = await showTimePicker(
+                        context: context,
+                        initialTime: const TimeOfDay(hour: 17, minute: 0),
+                      );
+                      if (time != null) {
+                        setState(() => _recurringEndTime = time);
+                      }
+                    },
+                  ),
+                  if (_recurringValidationError != null) ...[
+                    const SizedBox(height: 8),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Text(
+                        _recurringValidationError!,
+                        style: const TextStyle(color: Colors.red, fontSize: 13),
+                      ),
+                    ),
+                  ],
+                ],
+
                 const SizedBox(height: 32),
                 Center(
                   child: ElevatedButton(
